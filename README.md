@@ -1,2 +1,2 @@
-# signal-processing-paper
-LaTeX for the paper for final project in ENGR190AV, Signal Processing. Spring 2021.
+# movie-rating-predictor
+LaTeX for the paper for our final project in ENGR190AV, Signal Processing. Spring 2021.
