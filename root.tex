@@ -15,6 +15,7 @@
 
 % The following packages can be found on http:\\www.ctan.org
 \usepackage{graphicx} % for pdf, bitmapped graphics files
+\usepackage{subcaption}
 %\usepackage{epsfig} % for postscript graphics files
 %\usepackage{mathptmx} % assumes new font selection scheme installed
 %\usepackage{times} % assumes new font selection scheme installed
@@ -78,20 +79,28 @@ Our system uses NMF on this tag data to create clusters of tags, which we will e
    \caption{Block diagram of proposed system.}
 \end{figure}
 
-
 The overall architecture for our system is shown in Figure 1.
 
+\subsection{Nonnegative Matrix Factorization}
+\subsection{Expectation}
+\subsection{Predict Rating}
 
+\newpage
+
+\begin{figure*}[h]
+   \begin{subfigure}[b]{\columnwidth}
+      \includegraphics[width=\linewidth]{./figs/bestfingerprint.png}
+      \caption{Fingerprint of movie from good prediction.}
+   \end{subfigure}
+   \hfill
+   \begin{subfigure}[b]{\columnwidth}
+      \includegraphics[width=\linewidth]{./figs/worstfingerprint.png}
+      \caption{Fingerprint of movie from bad prediction.}
+   \end{subfigure}
+   \caption{Fingerprints of two movies. A fingerprint is the breakdown of the movie into genres. We can see that the fingerprint of the movie from the bad prediction has a wider distribution.}
+\end{figure*}
 \section{RESULTS}
-\begin{figure}[h]
-   \includegraphics[scale=0.5]{./figs/bestfingerprint.png}
-   \caption{Fingerprint for movie from best prediction.}
-\end{figure}
 
-\begin{figure}[h]
-   \includegraphics[scale=0.5]{./figs/worstfingerprint.png}
-   \caption{Fingerprint for movie from worst prediction.}
-\end{figure}
 
 \section{CONCLUSION}
 
