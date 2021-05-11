@@ -1,3 +1,5 @@
 *.fls
 *.aux
 *.fdb_latexmk
+root.log
+root.synctex.gz
