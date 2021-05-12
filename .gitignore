@@ -3,3 +3,5 @@
 *.fdb_latexmk
 root.log
 root.synctex.gz
+root.bbl
+root.blg

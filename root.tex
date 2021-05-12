@@ -69,15 +69,6 @@ We could also use a hybrid approach of the neighborhood and CF approahces \cite{
 In this paper, we use data from MovieLens. The dataset we use contains ratings of over 1000 movies made by various users, filtered such that each user has rated at least 20 movies.
 The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning \cite{lenskit}.
 
-\begin{figure}[h]
-    \includegraphics[scale=0.5]{figs/ratingdist.png}
-    \caption{Overall distribution of ratings in the database.}
-\end{figure}
-
-\begin{figure}[h]
-    \includegraphics[scale=0.5]{figs/ratingsperuser.png}
-    \caption{Distribution of number of ratings each user made.}
-\end{figure}
 
 Our system uses NMF on this tag data to create clusters of tags, which we will equate to "genres". We then use these genres predict ratings. Finally, we use mean movie ratings to adjust this predicted rating.
 
@@ -92,8 +83,30 @@ Our system uses NMF on this tag data to create clusters of tags, which we will e
 The overall architecture for our system is shown in Figure 1.
 
 \subsection{Nonnegative Matrix Factorization}
+
+We begin with the tag data, stored as a matrix of $t$ rows and $m$ columns. Here, $t$ is the number of tags and $m$ is the number of movies in the dataset.
+We perform NMF on the tag data matrix, which gives us a template matrix $W$ and an activation matrix $H$.
+In W, we have $t$ rows and $R$ columns, where $R$ represents the number of templates. In $H$, we have $R$ rows and $m$ columns.
+
+Each template is comprised of clusters of tags and represents a genre. For example, the romantic comedy genre might contain the tags "cliché," "romance," "Ryan Gosling," and "comedy." In $H$, each movie is broken down into its component genres.
+
 \subsection{Expectation}
+
+Next, we assemble a new matrix of reviews. This matrix has $m$ rows and $p$ columns, where $p$ is the number of reviewers, and stores all ratings made by each user.
+
+Then, we create another matrix $M$, which represents each reviewer's affinity to each genre. 
+$M$ has $R$ rows and $p$ columns. Each entry in $M$ is an rating out of five stars indicating what a reviewer is expected to rate a typical movie from a given genre.
+We get this information by taking the "expectation" of all the reviewer's ratings. In this expectation, ratings of movies more relevant to the genre of interest (as defined in $H$) are given more weight.
+
 \subsection{Predict Rating}
+Finally, we generate a predicted rating for a movie and reviewer from a query. For example, suppose we want to predict what reviewer A will rate the movie \textit{La La Land}. To do this, we will use a "genre fingerprint" for our movie.
+
+Recall that $H$ is an $R \times m$ matrix, representing the relevance of each genre to each movie. We can $L1$ normalize the columns of $H$ to create a matrix storing the genre fingerprints of each movie.
+These fingerprints indicate the breakdown of the movie into its component genres, such that each genre represents a proportion of the entire movie. See Figure 2 for examples of genre fingerprints.
+
+For our example, let's assume that \textit{La La Land}'s fingerprint is 75\% romantic comedy and 25\% drama. Then, based on reviewer A's preferences for these genres (from matrix $M$), we can generate a preliminary prediction for their rating.
+
+Finally, we look at the mean movie rating for \textit{La La Land}. If this mean rating is higher than our preliminary prediction, we round up to the nearest half-star. Otherwise, we round down.
 
 \begin{figure*}[h]
    \begin{subfigure}[b]{\columnwidth}
