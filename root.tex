@@ -56,18 +56,28 @@ The goal of recommendation systems is to suggest suitable content such as movies
 \section{INTRODUCTION}
 
 The goal of this paper is to predict what someone will rate a movie on a five-star scale.
-This prediction can be used in recommendation systems (citation?) for not only movies, but also grocery shopping, music, and more.
+This prediction can be used in recommendation systems for not only movies, but also grocery shopping, music, and more \cite{recsys}.
 
 There are several obstacles that make this problem challenging. 
-One issue, as investigated in [citation Netflix Bellsmth] is the effect of time. Over time, users may change their baseline rating (for example, have higher expectations of graphics) and begin to prefer different genres and actors.
-Movies themselves also become more or less popular over time.
+One issue, as investigated by Bell et al. is the effect of time. Over time, users may change their baseline rating (for example, have higher expectations of graphics) and begin to prefer different genres and actors \cite{netflix}.
+Movies themselves also become more or less popular over time \cite{netflix}.
 
-One approach that has been taken is to use a "neighborhood approach" that compares different movies, and recommends a highly rated movie that is similar to other movies a user has liked [citation]. 
-Another approach is to use collaborative filtering (CF) methods (citation) such as nonnegative matrix factorization (NMF) and singular value decomposition (SVD). 
-We could also use a hybrid approach of the neighborhood and CF approahces [citation Koren 2008].
+One approach that has been taken is to use a "neighborhood approach" that compares different movies, and recommends a highly rated movie that is similar to other movies a user has liked. 
+Another approach is to use collaborative filtering (CF) methods such as nonnegative matrix factorization (NMF) and singular value decomposition (SVD) \cite{cf}. 
+We could also use a hybrid approach of the neighborhood and CF approahces \cite{hybrid}.
 
-In this paper, we use data from MovieLens [citation]. The dataset we use contains ratings of over 1000 movies made by various users, filtered such that each user has rated at least 20 movies.
-The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning [citation Tag Genome].
+In this paper, we use data from MovieLens. The dataset we use contains ratings of over 1000 movies made by various users, filtered such that each user has rated at least 20 movies.
+The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning \cite{lenskit}.
+
+\begin{figure}[h]
+    \includegraphics[scale=0.5]{figs/ratingdist.png}
+    \caption{Overall distribution of ratings in the database.}
+\end{figure}
+
+\begin{figure}[h]
+    \includegraphics[scale=0.5]{figs/ratingsperuser.png}
+    \caption{Distribution of number of ratings each user made.}
+\end{figure}
 
 Our system uses NMF on this tag data to create clusters of tags, which we will equate to "genres". We then use these genres predict ratings. Finally, we use mean movie ratings to adjust this predicted rating.
 
@@ -85,8 +95,6 @@ The overall architecture for our system is shown in Figure 1.
 \subsection{Expectation}
 \subsection{Predict Rating}
 
-\newpage
-
 \begin{figure*}[h]
    \begin{subfigure}[b]{\columnwidth}
       \includegraphics[width=\linewidth]{./figs/bestfingerprint.png}
@@ -99,18 +107,30 @@ The overall architecture for our system is shown in Figure 1.
    \end{subfigure}
    \caption{Fingerprints of two movies. A fingerprint is the breakdown of the movie into genres. We can see that the fingerprint of the movie from the bad prediction has a wider distribution.}
 \end{figure*}
+
+\begin{figure*}[h]
+   \begin{subfigure}[b]{\columnwidth}
+      \includegraphics[width=\linewidth]{./figs/gooddist.png}
+      \caption{Distribution of ratings for a well-predicted movie. The predicted and true ratings were both 3.0 stars.}
+   \end{subfigure}
+   \hfill
+   \begin{subfigure}[b]{\columnwidth}
+      \includegraphics[width=\linewidth]{./figs/baddist.png}
+      \caption{Distribution of ratings for a badly-predicted movie. The predicted and true ratings were 4.5 and 0.5 stars respectively, while the most popular ratings seem to have been 4.0 and 5.0 stars.}
+   \end{subfigure}
+   \caption{Rating distributions for two movies.}
+\end{figure*}
+
 \section{RESULTS}
 
 
 \section{CONCLUSION}
 
-
-
-\begin{thebibliography}{99}
-   \bibitem{c1} test
-
-
-\end{thebibliography}
+\newpage
+misc
+\newpage
+\bibliographystyle{IEEEtran}
+\bibliography{paperbib}
 
 
 
