@@ -47,7 +47,10 @@ Movie Rating Prediction Using Nonnegative Matrix Factorization on Movie Tags
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-The goal of recommendation systems is to suggest suitable content such as movies, groceries, and more. This article aims to predict what someone will rate a movie, which could in turn be applied to a movie recommendation system. We propose a method of addressing this problem 
+The goal of recommendation systems is to suggest suitable content such as movies, groceries, and more. This article aims to predict what someone will rate a movie, which could in turn be applied to a movie recommendation system.
+We investigate this problem using 1,024 movies and 204,924 ratings from a MovieLens dataset.
+We propose a method of addressing this problem using nonnegative matrix factorization (NMF). This original method produced a root mean square error (RMSE) of 0.9748. We then propose a mechanism to improve these predictions by rounding our preliminary rating prediction based on the mean movie rating.
+Our improved method achieves an RMSE of 0.9597, which is significantly better than the RMSE of 0.9644 for a naive system that simply predicts the mean movie rating.
 
 \end{abstract}
 
@@ -64,7 +67,7 @@ Movies themselves also become more or less popular over time \cite{netflix}.
 
 One approach that has been taken is to use a "neighborhood approach" that compares different movies, and recommends a highly rated movie that is similar to other movies a user has liked. 
 Another approach is to use collaborative filtering (CF) methods such as nonnegative matrix factorization (NMF) and singular value decomposition (SVD) \cite{cf}. 
-We could also use a hybrid approach of the neighborhood and CF approahces \cite{hybrid}.
+We could also use a hybrid approach of the neighborhood and CF approaches \cite{hybrid}.
 
 In this paper, we use data from MovieLens. The dataset we use contains ratings of over 1000 movies made by various users, filtered such that each user has rated at least 20 movies.
 The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning \cite{lenskitdata}.
@@ -160,7 +163,13 @@ Ultimately, these observations may illustrate that tag data is only one indicato
 
 
 \section{CONCLUSION}
-Hybrid approach
+
+We have proposed a method to predict what a reviewer would rate an arbitrary movie out of five stars. To do this, we use the reviewer's history and the movie's relevance to a series of short labels, or tags.
+Our approach is to modify results from nonnegative matrix factorization on the tag data by rounding based on the mean movie rating. We evaluate our system on a dataset of 1,024 movies, and 204,924 ratings.
+Our system achieves a root mean square error of 0.9597.
+Our underlying assumption is that the tags are a good measure of the movie's content and adequately model how a reviewer will feel about the movie.
+One potential area of future work is to gracefully handle situations where that assumption may be violated. For example, we may not want to affiliate users with tags that have negative sentiments.
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{paperbib}
