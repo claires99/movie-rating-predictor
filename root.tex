@@ -23,12 +23,13 @@
 %\usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
-% Preparation of Papers for IEEE Sponsored Conferences \& Symposia*
 Movie Rating Prediction Using Nonnegative Matrix Factorization on Movie Tags
 }
 
 
 \author{Claire Chang, Thaxter Shaw, and TJ Tsai$^{1}$% <-this % stops a space
+\\ \vspace*{10pt} \normalsize  May 14, 2021
+
 \thanks{$^{1}$T. Tsai is with the Department of Engineering at Harvey Mudd College,
 301 Platt Blvd., Claremont, CA 91711. E-mail: {\tt\small ttsai@hmc.edu}}%
 }
@@ -56,26 +57,31 @@ Our improved method achieves an RMSE of 0.9597, which is significantly better th
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\medbreak
 \section{INTRODUCTION}
 
 The goal of this paper is to predict what someone will rate a movie on a five-star scale.
 This prediction can be used in recommendation systems for not only movies, but also grocery shopping, music, and more \cite{recsys}.
 
 There are several obstacles that make this problem challenging. 
-One issue, as investigated by Bell et al. is the effect of time. Over time, users may change their baseline rating (for example, have higher expectations of graphics) and begin to prefer different genres and actors \cite{netflix}.
-Movies themselves also become more or less popular over time \cite{netflix}.
+One issue is the effect of time. Over time, users may change their baseline rating (for example, have higher expectations of graphics) and begin to prefer different genres and actors \cite{netflix}.
+Movies themselves also become more or less popular over time.
 
 One approach that has been taken is to use a "neighborhood approach" that compares different movies, and recommends a highly rated movie that is similar to other movies a user has liked. 
-Another approach is to use collaborative filtering (CF) methods such as nonnegative matrix factorization (NMF) and singular value decomposition (SVD) \cite{cf}. 
-We could also use a hybrid approach of the neighborhood and CF approaches \cite{hybrid}.
+Another approach is to use collaborative filtering methods such as nonnegative matrix factorization (NMF) and singular value decomposition (SVD) \cite{cf}. 
+We could also use a hybrid approach of the neighborhood and collaborative filtering approaches \cite{hybrid}.
 
-In this paper, we use data from MovieLens. The dataset we use contains ratings of over 1000 movies made by various users, filtered such that each user has rated at least 20 movies.
-The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning \cite{lenskitdata}.
+Previous works \cite{nmfratings} have used NMF to describe the reviewer rating matrix in a recommendation system, and found that NMF-based algorithms obtain the best performance compared with other collaborative filtering methods. More directly comparing NMF with other collaborative filtering methods, it has been shown \cite{nmfratings} that NMF is more sensitive to initial conditions. Other works \cite{cfcompare} have also looked into comparing NMF with other collaborative filtering methods, and found that SVD results in better accuracy (unless there are a relatively low number of users and items), but also requires more computation time. For example, one successful team using modified SVD algorithms on the Netflix dataset (containing 480,189 reviewers and 17,770 movies) won the 2007 Netflix Progress Prize \cite{netflix}. Besides accuracy and runtime, there are also trade-offs with using a larger dataset and using SVD. Although they are more accurate, these algorithms tend to also have a higher variance in accuracy, have more adjustable parameters, and be less computationally efficient \cite{cfcompare}.
+
+In this paper, we use data from MovieLens. The subset of the dataset we use contains ratings 1,024 movies made by various users, filtered such that each user has rated at least 20 movies.
+The dataset also relates each movie to a series of short tags, such as "sci-fi," "cliché," or "overrated." This data was collected through users applying labels to movies, and machine learning \cite{lenskitdata}. Another challenge presents itself in the tags. We can sort the tags into categories such as movie type (for example, romance or comedy) and a user or subjective view (for example, funny or boring) \cite{tags}. While the subjective tags with a positive sentiment more clearly correspond with a generally highly rated movie, the other tags are a bit more complex. The preference for movie types depends on the reviewer, and subjective tags with a negative sentiment may be detrimental to our filtering system.
 
 
-Our system uses NMF on this tag data to create clusters of tags, which we will equate to "genres". We then use these genres predict ratings. Finally, we use mean movie ratings to adjust this predicted rating.
+Our system uses NMF on this tag data to create clusters of tags, which we will equate to "genres." We chose NMF due to time and space constraints, and because using a smaller set of data means that NMF should perform relatively better than other collaborative filtering methods \cite{cfcompare}. After performing NMF, we use the genres to predict ratings. Finally, we use mean movie ratings to adjust these predicted ratings.
 
+Our work differs from previous work on recommendation systems in two main ways. First, we use NMF on tag data. By contrast, previous works have used NMF on ratings directly. Second, we make informed adjustments to our predictions based on the mean movie ratings. This adjustment allows us to consider both user preferences (from NMF) and overall movie quality (from the movie mean rating). With our adjustment, we obtain a root mean square error of 0.9597.
 
+\medbreak
 \section{SYSTEM DESCRIPTION}
 
 \begin{figure}[h]
@@ -83,8 +89,9 @@ Our system uses NMF on this tag data to create clusters of tags, which we will e
    \caption{Block diagram of proposed system.}
 \end{figure}
 
-The overall architecture for our system is shown in Figure 1.
+The overall architecture for our system is shown in Figure 1. There are three key components that are needed to construct this system: performing NMF, creating an "expectation" for user preferences, and generating a rating prediction. These steps are described in detail in the following three subsections.
 
+\smallbreak
 \subsection{Nonnegative Matrix Factorization}
 
 We begin with the tag data, stored as a matrix of $t$ rows and $m$ columns. Here, $t$ is the number of tags and $m$ is the number of movies in the dataset.
@@ -97,6 +104,7 @@ It is important to mention that we use a random initialization. Ideally, we woul
 
 One of the parameters we tried to vary was the number of templates used. However, performance did not improve significantly when using 50, 200, 500, or 1000 templates. By contrast, it drastically increased the runtime. We also noticed that between 10 and 50 templates, there was a small but noteworthy increase in performance and not a significant increase in runtime, so we decided to use 50 templates.
 
+\smallbreak
 \subsection{Expectation}
 
 Next, we assemble a new matrix of reviews. This matrix has $m$ rows and $p$ columns, where $p$ is the number of reviewers, and stores all ratings made by each user.
@@ -109,21 +117,29 @@ We get this information by taking the "expectation" of all the reviewer's rating
 Finally, we generate a predicted rating for a movie and reviewer from a query. For example, suppose we want to predict what reviewer A will rate the movie \textit{La La Land}. To do this, we will use a "genre fingerprint" for our movie.
 
 Recall that $H$ is an $R \times m$ matrix, representing the relevance of each genre to each movie. We can $L1$ normalize the columns of $H$ to create a matrix storing the genre fingerprints of each movie.
-These fingerprints indicate the breakdown of the movie into its component genres, such that each genre represents a proportion of the entire movie. See Figure 2 for examples of genre fingerprints.
+These fingerprints indicate the breakdown of the movie into its component genres, such that each genre represents a proportion of the entire movie. See Figure 3 for examples of genre fingerprints.
 
 For our example, let's assume that \textit{La La Land}'s fingerprint is 75\% romantic comedy and 25\% drama. Then, based on reviewer A's preferences for these genres (from matrix $M$), we can generate a preliminary prediction for their rating.
 
-Finally, we look at the mean movie rating for \textit{La La Land}. If this mean rating is higher than our preliminary prediction, we round up to the nearest half-star. Otherwise, we round down.
+Finally, we look at the mean movie rating for \textit{La La Land}. If this mean rating is higher than our preliminary prediction, we round up to the nearest half-star. Otherwise, we round down. However, there is the caveat that this rounding is a somewhat basic way of balancing user preferences and overall movie quality. Thus, it is worth noting that for a more complex system, we may wish to add a hyperparameter that modifies the weights of the two factors.
 
+\medbreak
 \section{RESULTS}
 
-For our experiments, we use the ratings from the first 1,024 movies from the MovieLens dataset and the relevance of those movies to each of the 1,128 tags. The 204,924 available ratings were divided into an 80\% training and 20\% testing split, and the system was applied to the training cases to make predictions for test cases \cite{lenskitmodule}. As is common in CF problems, we use the Root Mean Square Error (RMSE) as an evaluation metric \cite{lenskitmodule}. RMSE is calculated as follows: 
+For our experiments, we use the ratings from the first 1,024 movies from the MovieLens dataset and the relevance of those movies to each of the 1,128 tags. The 204,924 available ratings were divided into an 80\% training and 20\% testing split, and the system was applied to the training cases to make predictions for test cases \cite{lenskitmodule}. We can see the rating distribution of the training data in Figure \ref{ratingdist}, and we expect the distribution to reflect those of the testing and overall dataset. As is common in collaborative filtering problems, we use the Root Mean Square Error (RMSE) as an evaluation metric \cite{lenskitmodule}. RMSE is calculated as follows: 
 $$\sqrt{\frac{\sum_{i=1}^N (x_i - \hat{x}_i)^2}{N}},$$
 where $N=40,984$ is the number of ratings in the testing set, $x_i$ is the actual rating, and $\hat{x}_i$ is our predicted rating.
 
-Note that the training and test splits are randomized, but we will share results for one particular instance, and the predictions should relatively be the same throughout different instances. As a baseline, the RMSE when predicting the mean movie rating was 0.9644. Originally, before implementing the rounding mechanism, the RMSE with our algorithm was about 0.9748. We noticed that even the RMSE with the mean was better, but thought that our system was considering different factors--namely, the tags. Additionally, we suspected there could be some error if, for example, we predicted 3.6 stars as a rating but the true rating was 3.5 stars. Thus, we decided to round our prediction using the mean as an indicator. After adding the rounding, the RMSE decreased to approximately 0.9597. 
+\begin{figure}[h]
+    \includegraphics[scale=0.6]{figs/ratingdist.png}
+    \caption{Distribution of ratings for the training dataset. We can see that most of the ratings are 3 and 4 stars.}
+    \label{ratingdist}
+\end{figure}
 
-There are a few observations we can make about these results. First, we can study the genre fingerprint for the most and least accurate predictions. More specifically, the difference between our predicted rating and the true rating was 0 stars for the accurate rating, and 4 stars for the inaccurate rating. Referencing Figure 2, we notice that in the case of the accurate rating, the most prominent genre represents about 30\% of the movie, and all other genres comprise 15\% or less. On the other hand, for the inaccurate rating, the most prominent genre only represents about 14\% of the movie, and there are five other smaller peaks between 8\% and 10\% alone.
+Note that the training and test splits are randomized, but we will share results for one particular instance, and the predictions should relatively be the same throughout different instances. As a baseline, the RMSE when predicting the mean movie rating was 0.9644. Originally, before implementing the rounding mechanism, the RMSE with our algorithm was about 0.9748. We noticed that even the RMSE with the mean was better, but thought that our system was considering different factors--namely, the tags. Additionally, we suspected there could be some error if, for example, we predicted 3.6 stars as a rating but the true rating was 3.5 stars. Thus, we decided to round our prediction using the mean as an indicator. After adding the rounding, the RMSE decreased to approximately 0.9597. 
+From Figure \ref{ratingdist}, it is also interesting to note that half-star ratings are less popular. One reason may be that people prefer giving whole numbers, and ratings of 1, 2, 3, 4, and 5 stars adequately describe their opinions about movie quality. In the future, it may be worthy to explore whether we should discourage half-star ratings.
+
+There are a few observations we can make about these results. First, we can study the genre fingerprint for the most and least accurate predictions. More specifically, the difference between our predicted rating and the true rating was 0 stars for the accurate rating, and 4 stars for the inaccurate rating. Referencing Figure 3, we notice that in the case of the accurate rating, the most prominent genre represents about 30\% of the movie, and all other genres comprise 15\% or less. On the other hand, for the inaccurate rating, the most prominent genre only represents about 14\% of the movie, and there are five other smaller peaks between 8\% and 10\% alone.
 
 \begin{figure}[h]
    \begin{subfigure}[b]{\columnwidth}
@@ -138,11 +154,11 @@ There are a few observations we can make about these results. First, we can stud
    \caption{Fingerprints of two movies. A fingerprint is the breakdown of the movie into genres. We can see that the fingerprint of the movie from the bad prediction has a wider distribution.}
 \end{figure}
 
-From Figure 2, we hypothesize that our system performs better when a movie's categorization is more straightforward, and it falls primarily into a single genre. If the movie breaks down into several genres, it is more difficult to predict a rating. What if there are two high peaks, and the reviewer loves one of the genres and hates the other one? In this case, our system would predict a medium review, but it is more likely that the reviewer would either give a high or a low rating. We attempted to address this concern by only using the most significant genre, but this approach had a very high RMSE of approximately 1.003. This failure is potentially because the true rating could just as easily reflect the secondary or tertiary genre of a movie, rather than the primary one.
+From Figure 3, we hypothesize that our system performs better when a movie's categorization is more straightforward, and it falls primarily into a single genre. If the movie breaks down into several genres, it is more difficult to predict a rating. What if there are two high peaks, and the reviewer loves one of the genres and hates the other one? In this case, our system would predict a medium review, but it is more likely that the reviewer would either give a high or a low rating. We attempted to address this concern by only using the most significant genre, but this approach had a very high RMSE of approximately 1.003. This failure is potentially because the true rating could just as easily reflect the secondary or tertiary genre of a movie, rather than the primary one.
 
 Although we considered filtering the genres by a certain relevance, the variation in normalized relevance made this problematic. Instead, we tried filtering tags. If the total tag relevance across all movies was under a certain amount, we ignored that tag by setting its initialization in the $W$ matrix to 0 for NMF. Running our algorithm with this adjustment gave an RMSE of about 0.9739, which was approximately the same as running without this adjustment. One reason this filtration was not effective might be because the relevance of the tags does not matter as much as their meaning. As mentioned previously, another step could be to filter negative tags.
 
-Besides the genre fingerprint, we can look at the distribution of ratings across all reviewers for these accurate and inaccurate predictions. Referencing Figure 3, we can see that for the "good prediction," there is a clear peak at 3 stars. As you might expect, both our predicted rating and the true ratings were 3 stars. If we look at the "bad prediction," there are peaks at 4 and 5 stars. We predict a rating of 4.5 stars, which seems to be reasonable. However, the reviewer in question gave a 0.5 star rating.
+Besides the genre fingerprint, we can look at the distribution of ratings across all reviewers for these accurate and inaccurate predictions. Referencing Figure 4, we can see that for the "good prediction," there is a clear peak at 3 stars. As you might expect, both our predicted rating and the true ratings were 3 stars. If we look at the "bad prediction," there are peaks at 4 and 5 stars. We predict a rating of 4.5 stars, which seems to be reasonable. However, the reviewer in question gave a 0.5 star rating.
 
 \begin{figure}[h]
    \begin{subfigure}[b]{\columnwidth}
@@ -157,18 +173,19 @@ Besides the genre fingerprint, we can look at the distribution of ratings across
    \caption{Rating distributions for two movies.}
 \end{figure}
 
-From Figure 3, we hypothesize that there may be anomalies or outliers in our system. Because the RMSE gives more weight to large prediction errors, we can see the results of these anomalies in our error.
+From Figure 4, we hypothesize that there may be anomalies or outliers in our system. Because the RMSE gives more weight to large prediction errors, we can see the results of these anomalies in our error.
 
 Ultimately, these observations may illustrate that tag data is only one indicator of what someone might rate a movie. This dependency is a major drawback of our system, as compared to other systems that use several and hence have lower RMSEs. For example, a study looking more in-depth on temporal effects obtained an RMSE of 0.8784 \cite{netflix}. We do know, however, that an RMSE of between 0.85 and 1.3 or more is to be expected when predicting ratings \cite{netflix}.
 
-
+\medbreak
 \section{CONCLUSION}
 
 We have proposed a method to predict what a reviewer would rate an arbitrary movie out of five stars. To do this, we use the reviewer's history and the movie's relevance to a series of short labels, or tags.
-Our approach is to modify results from nonnegative matrix factorization on the tag data by rounding based on the mean movie rating. We evaluate our system on a dataset of 1,024 movies, and 204,924 ratings.
+Our approach is to modify results from nonnegative matrix factorization (NMF) on the tag data by rounding based on the mean movie rating. We evaluate our system on a dataset of 1,024 movies, and 204,924 ratings.
 Our system achieves a root mean square error of 0.9597.
 Our underlying assumption is that the tags are a good measure of the movie's content and adequately model how a reviewer will feel about the movie.
-One potential area of future work is to gracefully handle situations where that assumption may be violated. For example, we may not want to affiliate users with tags that have negative sentiments.
+
+One potential area of future work is to gracefully handle situations where that assumption may be violated. For example, we may not want to affiliate users with tags that have negative sentiments. Another area of future work is to add and fine-tune a hyperparameter to find the optimal balance between weights for user preferences (expressed through NMF results) and overall movie quality (from mean movie ratings).
 
 
 \bibliographystyle{IEEEtran}
